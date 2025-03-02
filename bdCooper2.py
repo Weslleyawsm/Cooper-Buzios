@@ -137,7 +137,7 @@ def fetch_data_fiscais():
 def atualizar_coop():
     conexao = conectar_db()
     cursor = conexao.cursor()
-    cursor.execute('select vaga, nome, sobrenome from cooperados')
+    cursor.execute('select id, vaga, nome, sobrenome from cooperados')
     resultado = cursor.fetchall()
     cursor.close()
     conexao.close()
@@ -147,7 +147,7 @@ def atualizar_coop():
 def atualizar_mot_aux():
     conexao = conectar_db()
     cursor = conexao.cursor()
-    cursor.execute('select vaga, nome, sobrenome from mot_aux')
+    cursor.execute('select id, vaga, nome, sobrenome from mot_aux')
     resultado = cursor.fetchall()
     cursor.close()
     conexao.close()
@@ -313,7 +313,7 @@ def main(page: ft.Page):
 
             if not selected_rows:
                 # Optional: Show an alert if no row is selected
-                page.show_snack_bar(ft.SnackBar(content=ft.Text(
+                page.open(ft.SnackBar(content=ft.Text(
                     "Por favor, selecione um cooperado para deletar")))
                 return
 
@@ -326,7 +326,7 @@ def main(page: ft.Page):
                 cursor = conexao.cursor()
 
                 # Execute delete query using vaga as identifier
-                cursor.execute('DELETE FROM cooperados WHERE vaga = %s',
+                cursor.execute('DELETE FROM cooperados WHERE id = %s',
                                (selected_vaga,))
                 conexao.commit()
 
@@ -335,7 +335,7 @@ def main(page: ft.Page):
                 conexao.close()
 
                 # Optional: Show success message
-                page.show_snack_bar(ft.SnackBar(
+                page.open(ft.SnackBar(
                     content=ft.Text("Cooperado deletado com sucesso!")))
 
                 # Update the table after deletion
@@ -365,44 +365,56 @@ def main(page: ft.Page):
         def atualizar_coop():
             conexao = conectar_db()
             cursor = conexao.cursor()
-            cursor.execute('select vaga, nome, sobrenome from cooperados')
+            cursor.execute('select id, vaga, nome, sobrenome from cooperados')
             resultado = cursor.fetchall()
             cursor.close()
             conexao.close()
             return resultado
 
         dado_c = atualizar_coop()
-        vaga_c = ft.TextField(label='Vaga do Cooperado', text_size=16, width=200, border_radius=ft.border_radius.all(
-            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+        vaga_c = ft.TextField(label='Vaga do Cooperado', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
+  # fase de texte
 
-        nome_c = ft.TextField(label='Nome do Cooperado', text_size=16, width=200, border_radius=ft.border_radius.all(
-            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+        nome_c = ft.TextField(label='Nome do Cooperado', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
+ # fase de texte
 
-        sobrenome_c = ft.TextField(label='Sobrenome do Cooperado', text_size=16, width=200, border_radius=ft.border_radius.all(
-            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+        sobrenome_c = ft.TextField(label='Sobrenome do Cooperado', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+            30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
+  # fase de texte
 
         row = ft.Container(
-            content=ft.Row(
+            content=ft.ResponsiveRow(
                 controls=[
                     ft.DataTable(
                         columns=[
-                            ft.DataColumn(label=ft.Text('Vaga')),
-                            ft.DataColumn(label=ft.Text('Nome')),
-                            ft.DataColumn(label=ft.Text('Sobrenome'))
+                            ft.DataColumn(label=ft.Text('Id', col={
+                                'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Vaga', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Nome', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Sobrenome', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START)
                         ],
                         rows=[
                             ft.DataRow(
                                 cells=[
-                                    ft.DataCell(
-                                        content=ft.Text(str(vaga))),
-                                    ft.DataCell(content=ft.Text(nome)),
-                                    ft.DataCell(content=ft.Text(sobrenome))
+                                    ft.DataCell(content=ft.Text(
+                                        id, col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        str(vaga), col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        nome, col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        sobrenome, col={'xs': 12, 'sm': 1}, size=10)),
                                 ],
                                 selected=False,
                                 on_select_changed=toggle_select,
                                 data=0
 
-                            )for vaga, nome, sobrenome in dado_c
+                            )for id, vaga, nome, sobrenome in dado_c
 
 
                         ],
@@ -416,29 +428,37 @@ def main(page: ft.Page):
                         border_radius=ft.border_radius.all(5),
                         # data_row_color=ft.Colors.BLACK,
                         heading_row_color=ft.Colors.BLUE_900,
-                        show_checkbox_column=False
+                        show_checkbox_column=False,
+                        column_spacing=10
                     )
                 ]
             )
         )
 
         atualizado = ft.Container(
-            content=ft.Row(
+            content=ft.ResponsiveRow(
                 controls=[
-                    ft.Container(
-                        content=ft.Column(controls=[
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.ElevatedButton("Informações os Cooperados", bgcolor=ft.Colors.AMBER, color=ft.Colors.BLACK, width=250, col={
+                                              'xs': 4, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
                             ft.ElevatedButton(
-                                text='Fechar Dados',
-                                on_click=fechar,
-                                bgcolor=ft.Colors.RED,
-                                color=ft.Colors.BLACK),
-                            row
+                                text='Cadastrar', on_click=salvar_c, bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                            ft.ElevatedButton(
+                                text='Deletar', color=ft.Colors.BLACK, bgcolor=ft.Colors.RED, width=100, on_click=delete_c, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                            ft.Container(col={'xs': 0, 'sm': 2}),
+                            ft.IconButton(
+                                icon=ft.Icons.CLOSE, icon_color=ft.Colors.RED, on_click=fechar, col={'xs': 1, 'sm': 1}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD)))
                         ]
-                        )
                     ),
-                    ft.Container(content=ft.Row(controls=[vaga_c, nome_c, sobrenome_c, ft.ElevatedButton(
-                        text='Cadastrar', bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100, on_click=salvar_c), ft.ElevatedButton(text='Deletar', bgcolor=ft.Colors.RED, color=ft.Colors.BLACK, width=100, on_click=delete_c)]), padding=ft.padding.symmetric(40)),
-
+                    ft.Container(content=ft.ResponsiveRow(controls=[
+                        vaga_c,
+                        nome_c,
+                        sobrenome_c
+                    ]
+                    )
+                    ),
+                    row
                 ],
                 vertical_alignment=ft.CrossAxisAlignment.START
             )
@@ -474,14 +494,17 @@ def main(page: ft.Page):
         cadastrar_mot_aux(vaga, nome, sobrenome)
 
     global vaga_m_a, nome_m_a, sobrenome_m_a
-    vaga_m_a = ft.TextField(label='Vaga do Cooperado', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+    vaga_m_a = ft.TextField(label='Vaga do Cooperado', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
-    nome_m_a = ft.TextField(label='Nome do Motorista', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+    nome_m_a = ft.TextField(label='Nome do Motorista', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
-    sobrenome_m_a = ft.TextField(label='Sobrenome do Motorista', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)  # fase de texte
+    sobrenome_m_a = ft.TextField(label='Sobrenome do Motorista', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
     def atualizar_m_a():
         # dt2.content.controls.clear()
@@ -492,7 +515,7 @@ def main(page: ft.Page):
             ]
 
             if not selected_mot:
-                page.show_snack_bar(ft.SnackBar(content=ft.Text(
+                page.open(ft.SnackBar(content=ft.Text(
                     "Por favor, selecione um cooperado para deletar")))
                 return
 
@@ -503,13 +526,13 @@ def main(page: ft.Page):
                 cursor = conexao.cursor()
 
                 cursor.execute(
-                    'DELETE FROM mot_aux WHERE vaga = %s', (selected_vaga,))
+                    'DELETE FROM mot_aux WHERE id = %s', (selected_vaga,))
 
                 conexao.commit()
 
                 cursor.close()
                 conexao.close()
-                page.show_snack_bar(ft.SnackBar(
+                page.open(ft.SnackBar(
                     ft.Text("Motorista auxiliar deletado com sucesso!")))
 
                 atualizar_m_a()
@@ -532,26 +555,36 @@ def main(page: ft.Page):
             atualizar_m_a()
         dado_m = atualizar_mot_aux()
         row2 = ft.Container(
-            content=ft.Row(
+            content=ft.ResponsiveRow(
                 controls=[
                     ft.DataTable(
                         columns=[
-                            ft.DataColumn(label=ft.Text('Vaga')),
-                            ft.DataColumn(label=ft.Text('Nome')),
-                            ft.DataColumn(label=ft.Text('Sobrenome'))
+                            ft.DataColumn(label=ft.Text('Id', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Vaga', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Nome', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                            ft.DataColumn(label=ft.Text('Sobrenome', col={
+                                          'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START)
                         ],
                         rows=[
                             ft.DataRow(
                                 cells=[
-                                    ft.DataCell(content=ft.Text(str(vaga))),
-                                    ft.DataCell(content=ft.Text(nome)),
-                                    ft.DataCell(content=ft.Text(sobrenome)),
+                                    ft.DataCell(content=ft.Text(
+                                        id, col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        str(vaga), col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        nome, col={'xs': 12, 'sm': 1}, size=10)),
+                                    ft.DataCell(content=ft.Text(
+                                        sobrenome, col={'xs': 12, 'sm': 1}, size=10)),
 
                                 ],
                                 selected=False,
                                 on_select_changed=toggle_select,
                                 data=0
-                            )for vaga, nome, sobrenome in dado_m
+                            )for id, vaga, nome, sobrenome in dado_m
                         ],
                         divider_thickness=1,
                         vertical_lines=ft.BorderSide(
@@ -561,30 +594,37 @@ def main(page: ft.Page):
                         border=ft.border.all(width=2, color=ft.Colors.AMBER),
                         border_radius=ft.border_radius.all(5),
                         # data_row_color=ft.Colors.BLACK,
-                        heading_row_color=ft.Colors.BLUE_900
+                        heading_row_color=ft.Colors.BLUE_900,
+                        column_spacing=10
 
                     )
                 ]
             )
         )
 
-        atualizado = ft.Container(content=ft.Row(
+        atualizado = ft.Container(content=ft.ResponsiveRow(
             controls=[
-                ft.Container(
-                    content=ft.Column(
-                        controls=[
-                            ft.ElevatedButton(text="Fechar Dados",
-                                              on_click=fechar,
-                                              bgcolor=ft.Colors.RED,
-                                              color=ft.Colors.BLACK),
-                            row2
-                        ]
-                    )
+                ft.ResponsiveRow(
+                    controls=[
+                        ft.ElevatedButton("Informações os Cooperados", bgcolor=ft.Colors.AMBER, color=ft.Colors.BLACK, width=250, col={
+                            'xs': 4, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.ElevatedButton(
+                            text='Cadastrar', on_click=salvar_m_a, bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.ElevatedButton(
+                            text='Deletar', color=ft.Colors.BLACK, bgcolor=ft.Colors.RED, width=100, on_click=delete_m_a, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.Container(col={'xs': 0, 'sm': 2}),
+                        ft.IconButton(
+                            icon=ft.Icons.CLOSE, icon_color=ft.Colors.RED, on_click=fechar, col={'xs': 1, 'sm': 1}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD)))
+                    ]
                 ),
-                ft.Container(content=ft.Row(controls=[vaga_m_a, nome_m_a, sobrenome_m_a,
-                                                      ft.ElevatedButton(
-                                                          text="Cadastrar", bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100, on_click=salvar_m_a),
-                                                      ft.ElevatedButton(text="Deletar", width=100, bgcolor=ft.Colors.RED, color=ft.Colors.BLACK, on_click=delete_m_a)]), padding=ft.padding.symmetric(40))
+                ft.Container(content=ft.ResponsiveRow(controls=[
+                    vaga_m_a,
+                    nome_m_a,
+                    sobrenome_m_a,
+                ]
+                )
+                ),
+                row2
             ],
             vertical_alignment=ft.CrossAxisAlignment.START
 
@@ -598,14 +638,17 @@ def main(page: ft.Page):
         atualizar_m_a()
 
     global nome_fisc, sobrenome_fisc, linha_fisc
-    nome_fisc = ft.TextField(label='Nome do Fiscal', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)
+    nome_fisc = ft.TextField(label='Nome do Fiscal', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
-    sobrenome_fisc = ft.TextField(label='Sobrenome do Fiscal', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)
+    sobrenome_fisc = ft.TextField(label='Sobrenome do Fiscal', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
-    linha_fisc = ft.TextField(label='Linha Principal', text_size=16, width=200, border_radius=ft.border_radius.all(
-        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE)
+    linha_fisc = ft.TextField(label='Linha Principal', width=200, height=30, text_size=14, border_radius=ft.border_radius.all(
+        # fase de texte
+        30), border_color=ft.Colors.AMBER, color=ft.Colors.WHITE, label_style=ft.TextStyle(size=12), col={'xs': 12, 'sm': 2})
 
     def atualizar_fiscal():
         '''dt3.content.controls.clear()'''
@@ -654,19 +697,25 @@ def main(page: ft.Page):
             cadastrar_fisc(nome, sobrenome, linha)
             atualizar_fiscal()
         row3 = ft.Container(
-            content=ft.Row(
+            content=ft.ResponsiveRow(
                 controls=[ft.DataTable(
                     columns=[
-                        ft.DataColumn(label=ft.Text('Nome')),
-                        ft.DataColumn(label=ft.Text('Sobrenome')),
-                        ft.DataColumn(label=ft.Text('Linha Principal'))
+                        ft.DataColumn(label=ft.Text('Nome', col={
+                            'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                        ft.DataColumn(label=ft.Text('Sobrenome', col={
+                            'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START),
+                        ft.DataColumn(label=ft.Text('Linha Principal', col={
+                            'xs': 12, 'sm': 1}, size=10), heading_row_alignment=ft.MainAxisAlignment.START)
                     ],
                     rows=[
                         ft.DataRow(
                             cells=[
-                                ft.DataCell(content=ft.Text(nome)),
-                                ft.DataCell(content=ft.Text(sobrenome)),
-                                ft.DataCell(content=ft.Text(linha))
+                                ft.DataCell(content=ft.Text(
+                                    nome, col={'xs': 12, 'sm': 1}, size=10)),
+                                ft.DataCell(content=ft.Text(
+                                    sobrenome, col={'xs': 12, 'sm': 1}, size=10)),
+                                ft.DataCell(content=ft.Text(
+                                    linha, col={'xs': 12, 'sm': 1}, size=10))
                             ],
                             selected=False,
                             on_select_changed=toggle_select,
@@ -681,37 +730,39 @@ def main(page: ft.Page):
                     border=ft.border.all(width=2, color=ft.Colors.AMBER),
                     border_radius=ft.border_radius.all(5),
                     # data_row_color=ft.Colors.GREY,
-                    heading_row_color=ft.Colors.BLUE_900
+                    heading_row_color=ft.Colors.BLUE_900,
+                    column_spacing=10
                 )
                 ]
             )
         )
 
-        atualizado = ft.Container(
-            content=ft.Row(
-                controls=[
-                    ft.Container(ft.Column(controls=[
-                        ft.ElevatedButton(text="Fechar Dados",
-                                          on_click=fechar,
-                                          bgcolor=ft.Colors.RED,
-                                          color=ft.Colors.BLACK),
-                        row3
+        atualizado = ft.Container(content=ft.ResponsiveRow(
+            controls=[
+                ft.ResponsiveRow(
+                    controls=[
+                        ft.ElevatedButton("Informações os Fiscais", bgcolor=ft.Colors.AMBER, color=ft.Colors.BLACK, width=250, col={
+                            'xs': 4, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.ElevatedButton(
+                            text='Cadastrar', on_click=salvar_fisc, bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.ElevatedButton(
+                            text='Deletar', color=ft.Colors.BLACK, bgcolor=ft.Colors.RED, width=100, on_click=deletar_fiscal, col={'xs': 3, 'sm': 3}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD))),
+                        ft.Container(col={'xs': 0, 'sm': 2}),
+                        ft.IconButton(
+                            icon=ft.Icons.CLOSE, icon_color=ft.Colors.RED, on_click=fechar, col={'xs': 1, 'sm': 1}, style=ft.ButtonStyle(text_style=ft.TextStyle(size=12, weight=ft.FontWeight.BOLD)))
                     ]
-                    )
-                    ),
-                    ft.Container(ft.Row(controls=[
-                        nome_fisc, sobrenome_fisc, linha_fisc,
-                        ft.ElevatedButton(text='Cadastrar', on_click=salvar_fisc,
-                                          bgcolor=ft.Colors.GREEN, color=ft.Colors.BLACK, width=100),
-                        ft.ElevatedButton(text='Deletar', color=ft.Colors.BLACK,
-                                          bgcolor=ft.Colors.RED, width=100, on_click=deletar_fiscal)
-                    ]
-                    ), padding=ft.padding.symmetric(40)
-                    )
-
-                ],
-                vertical_alignment=ft.CrossAxisAlignment.START
-            )
+                ),
+                ft.Container(content=ft.ResponsiveRow(controls=[
+                    nome_fisc,
+                    sobrenome_fisc,
+                    linha_fisc,
+                ]
+                )
+                ),
+                row3
+            ],
+            vertical_alignment=ft.CrossAxisAlignment.START
+        )
         )
         page.add(atualizado)
         page.update()
@@ -1003,7 +1054,7 @@ def main(page: ft.Page):
                         # data_row_color=ft.Colors.GREY,
                         heading_row_color=ft.Colors.BLUE_900,
                         column_spacing=10
-                        
+
 
 
 
@@ -1105,4 +1156,4 @@ def main(page: ft.Page):
 
 
 if __name__ == '__main__':
-    ft.app(target=main)
+    ft.app(target=main, assets_dir='assets')
